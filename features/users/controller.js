@@ -19,7 +19,8 @@ exports.register = async (req, res) => {
       return throwError(res, errorMessage, 400, errorMessage);
     }
   } catch (error) {
-    return throwError(res, error, 500, 'Error creating user');
+    const errorMessage = 'Error creating user';
+    return throwError(res, error, 500, errorMessage);
   }
 
   const newUser = new User({
@@ -37,15 +38,12 @@ exports.register = async (req, res) => {
       .save()
       .then(user => res.json({ success: true, data: user }))
       .catch(err => {
+        let errorMessage = 'Error creating user';
         if (err.code === 11000) {
-          return throwError(
-            res,
-            err,
-            400,
-            `The user with the email "${email}" already exists`
-          );
+          errorMessage = `The user with the email "${email}" already exists`;
+          return throwError(res, err, 400, errorMessage);
         }
-        return throwError(res, err, 500, 'Error creating user');
+        return throwError(res, err, 500, errorMessage);
       });
   });
 };

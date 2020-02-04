@@ -15,9 +15,10 @@ exports.getStudents = (req, res) =>
         data: students
       })
     )
-    .catch(error =>
-      throwError(res, error, 500, 'Error retrieving all students')
-    );
+    .catch(error => {
+      const errorMessage = 'Error retrieving all students';
+      return throwError(res, error, 500, errorMessage);
+    });
 
 // @desc Create a student
 // @route POST /api/students
@@ -31,7 +32,10 @@ exports.addStudent = (req, res) =>
       .then(newStudent =>
         res.status(201).json({ success: true, data: newStudent })
       )
-      .catch(err => throwError(res, err, 500, 'Error creating student'));
+      .catch(err => {
+        const errorMessage = 'Error creating student';
+        return throwError(res, err, 500, errorMessage);
+      });
   });
 
 // @desc Update a student
@@ -53,7 +57,10 @@ exports.updateStudent = (req, res) =>
         const errorMessage = `The student with the id ${id} does not exist`;
         return throwError(res, errorMessage, 404, errorMessage);
       })
-      .catch(err => throwError(res, err, 500, 'Error updating student'));
+      .catch(err => {
+        const errorMessage = 'Error updating student';
+        return throwError(res, err, 500, errorMessage);
+      });
   });
 
 // @desc Delete a student by its id
@@ -74,5 +81,38 @@ exports.deleteStudent = (req, res) =>
         const errorMessage = `The student with the id ${id} does not exist`;
         return throwError(res, errorMessage, 404, errorMessage);
       })
-      .catch(err => throwError(res, err, 500, 'Error updating student'));
+      .catch(err => {
+        const errorMessage = 'Error updating student';
+        return throwError(res, err, 500, errorMessage);
+      });
+  });
+
+// @desc Add a student note
+// @route POST /api/students/:id/notes
+// @access Protected
+exports.addStudentNote = (req, res) =>
+  jwt.verify(req.token, process.env.JWT_SECRET_KEY, error => {
+    if (error) {
+      return res.sendStatus(403);
+    }
+    const { id } = req.params;
+    return Student.findById(id)
+      .then(student => {
+        const { date, topic, comments } = req.body;
+        const newNote = { date, topic, comments };
+        student.notes.push(newNote);
+        student
+          .save()
+          .then(updatedStudent =>
+            res.json({ success: true, data: updatedStudent })
+          )
+          .catch(err => {
+            const errorMessage = 'Error adding student note';
+            return throwError(res, err, 500, errorMessage);
+          });
+      })
+      .catch(err => {
+        const errorMessage = `The student with the id ${id} does not exist`;
+        return throwError(res, err, 404, errorMessage);
+      });
   });

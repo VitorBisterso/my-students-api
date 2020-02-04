@@ -1,5 +1,20 @@
 const mongoose = require('mongoose');
 
+const NoteSchema = new mongoose.Schema({
+  date: {
+    type: String,
+    required: [true, 'Note must have a date']
+  },
+  topic: {
+    type: String,
+    required: [true, 'Note must have a topic']
+  },
+  comments: {
+    type: String,
+    default: 'No comments'
+  }
+});
+
 const StudentSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -24,6 +39,10 @@ const StudentSchema = new mongoose.Schema({
   birthday: {
     type: String,
     required: [true, 'Student must have a birthday']
+  },
+  notes: {
+    type: [NoteSchema],
+    default: []
   },
   createdAt: {
     type: Date,
