@@ -10,7 +10,8 @@ connectDB();
 const app = express();
 app.use(express.json());
 
-app.use('/api/users', require('./features/users/routes'));
+app.use('/api/users', require('./features/users'));
+app.use('/api/students', require('./features/students'));
 
 const port = process.env.PORT || 8000;
 
