@@ -11,7 +11,6 @@ exports.getStudents = (req, res) =>
     .then(students =>
       res.status(200).json({
         success: true,
-        count: students.length,
         data: students
       })
     )
@@ -113,6 +112,82 @@ exports.addStudentNote = (req, res) =>
       })
       .catch(err => {
         const errorMessage = `The student with the id ${id} does not exist`;
+        return throwError(res, err, 404, errorMessage);
+      });
+  });
+
+// @desc Edit a student note
+// @route PUT /api/students/:studentId/notes/:noteId
+// @access Protected
+exports.updateStudentNote = (req, res) =>
+  jwt.verify(req.token, process.env.JWT_SECRET_KEY, error => {
+    if (error) {
+      return res.sendStatus(403);
+    }
+    const { studentId, noteId } = req.params;
+    return Student.findById(studentId)
+      .then(student => {
+        const { date, topic, comments } = req.body;
+        const updatedNote = { date, topic, comments };
+        const index = student.notes.findIndex(
+          // eslint-disable-next-line no-underscore-dangle
+          note => note._id.toString() === noteId
+        );
+        if (index >= 0) {
+          // eslint-disable-next-line no-param-reassign
+          student.notes = [
+            ...student.notes.slice(0, index),
+            updatedNote,
+            ...student.notes.slice(index + 1)
+          ];
+          student
+            .save()
+            .then(updatedStudent =>
+              res.json({ success: true, data: updatedStudent })
+            )
+            .catch(err => {
+              const errorMessage = 'Error updating student note';
+              return throwError(res, err, 500, errorMessage);
+            });
+        } else {
+          const errorMessage = `The note with the id ${noteId} does not exist`;
+          return throwError(res, errorMessage, 404, errorMessage);
+        }
+      })
+      .catch(err => {
+        const errorMessage = `The student with the id ${studentId} does not exist`;
+        return throwError(res, err, 404, errorMessage);
+      });
+  });
+
+// @desc Delete a student note
+// @route DELETE /api/students/:studentId/notes/:noteId
+// @access Protected
+exports.deleteStudentNote = (req, res) =>
+  jwt.verify(req.token, process.env.JWT_SECRET_KEY, error => {
+    if (error) {
+      return res.sendStatus(403);
+    }
+    const { studentId, noteId } = req.params;
+    return Student.findById(studentId)
+      .then(student => {
+        // eslint-disable-next-line no-param-reassign
+        student.notes = student.notes.filter(
+          // eslint-disable-next-line no-underscore-dangle
+          note => note._id.toString() !== noteId
+        );
+        student
+          .save()
+          .then(updatedStudent =>
+            res.json({ success: true, data: updatedStudent })
+          )
+          .catch(err => {
+            const errorMessage = 'Error deleting student note';
+            return throwError(res, err, 500, errorMessage);
+          });
+      })
+      .catch(err => {
+        const errorMessage = `The student with the id ${studentId} does not exist`;
         return throwError(res, err, 404, errorMessage);
       });
   });

@@ -5,7 +5,9 @@ const {
   addStudent,
   updateStudent,
   deleteStudent,
-  addStudentNote
+  addStudentNote,
+  updateStudentNote,
+  deleteStudentNote
 } = require('./controller');
 const { verifyToken } = require('../utils');
 
@@ -22,5 +24,9 @@ router
   .delete(verifyToken, deleteStudent);
 
 router.route('/:id/notes').post(verifyToken, addStudentNote);
+router
+  .route('/:studentId/notes/:noteId')
+  .put(verifyToken, updateStudentNote)
+  .delete(verifyToken, deleteStudentNote);
 
 module.exports = router;

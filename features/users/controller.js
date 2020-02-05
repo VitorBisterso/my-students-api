@@ -13,7 +13,7 @@ exports.register = async (req, res) => {
 
   const filter = { token: registerToken };
   try {
-    const token = await RegisterToken.findOne(filter);
+    const token = await RegisterToken.findOneAndDelete(filter);
     if (!token) {
       const errorMessage = `You cannot register without the admin's permission!`;
       return throwError(res, errorMessage, 400, errorMessage);
